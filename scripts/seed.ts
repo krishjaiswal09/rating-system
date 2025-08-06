@@ -1,6 +1,7 @@
 import bcrypt from "bcrypt";
 import { db } from "../server/db";
 import { users, stores, ratings } from "../shared/schema";
+import { sql } from "drizzle-orm";
 
 async function seed() {
   console.log("Seeding database...");

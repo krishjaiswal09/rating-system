@@ -1,6 +1,6 @@
 import { users, stores, ratings, type User, type Store, type Rating, type RegisterData, type StoreData, type RatingData } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, like, or, sql, count, avg } from "drizzle-orm";
+import { eq, desc, like, or, sql, count } from "drizzle-orm";
 
 export class SimpleStorage {
   // User operations
@@ -24,7 +24,7 @@ export class SimpleStorage {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return await db.select().from(users);
+    return db.select().from(users);
   }
 
   // Store operations
@@ -39,11 +39,11 @@ export class SimpleStorage {
   }
 
   async getAllStores(): Promise<Store[]> {
-    return await db.select().from(stores);
+    return db.select().from(stores);
   }
 
   async searchStores(query: string): Promise<Store[]> {
-    return await db
+    return db
       .select()
       .from(stores)
       .where(or(
@@ -61,7 +61,7 @@ export class SimpleStorage {
         address: stores.address,
         ownerId: stores.ownerId,
         createdAt: stores.createdAt,
-        averageRating: sql<number>`COALESCE(AVG(${ratings.rating}), 0)`,
+        averageRating: sql<number>`COALESCE(AVG(CAST(${ratings.rating} AS REAL)), 0)`,
         totalRatings: sql<number>`COUNT(${ratings.id})`,
       })
       .from(stores)

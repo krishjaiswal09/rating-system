@@ -1,34 +1,50 @@
-import { pgTable, varchar, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { z } from "zod";
 
 // Simple Users table
-export const users = pgTable("users", {
-  id: varchar("id").primaryKey().$defaultFn(() => `user-${Date.now()}`),
-  name: varchar("name").notNull(),
-  email: varchar("email").notNull().unique(),
-  password: varchar("password").notNull(),
-  role: varchar("role").notNull().default("user"),
+export const users = sqliteTable("users", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => `user-${Date.now()}`),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  role: text("role").notNull().default("user"),
   address: text("address"),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
 });
 
-// Simple Stores table  
-export const stores = pgTable("stores", {
-  id: varchar("id").primaryKey().$defaultFn(() => `store-${Date.now()}`),
-  name: varchar("name").notNull(),
-  email: varchar("email").notNull(),
+// Simple Stores table
+export const stores = sqliteTable("stores", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => `store-${Date.now()}`),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
   address: text("address").notNull(),
-  ownerId: varchar("owner_id").references(() => users.id),
-  createdAt: timestamp("created_at").defaultNow(),
+  ownerId: text("owner_id").references(() => users.id),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
 });
 
 // Simple Ratings table
-export const ratings = pgTable("ratings", {
-  id: varchar("id").primaryKey().$defaultFn(() => `rating-${Date.now()}`),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  storeId: varchar("store_id").notNull().references(() => stores.id),
+export const ratings = sqliteTable("ratings", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => `rating-${Date.now()}`),
+  userId: text("user_id")
+    .notNull()
+    .references(() => users.id),
+  storeId: text("store_id")
+    .notNull()
+    .references(() => stores.id),
   rating: integer("rating").notNull(),
-  createdAt: timestamp("created_at").defaultNow(),
+  createdAt: integer("created_at", { mode: "timestamp" }).$defaultFn(
+    () => new Date()
+  ),
 });
 
 // Simple validation schemas
@@ -38,12 +54,19 @@ export const loginSchema = z.object({
 });
 
 export const registerSchema = z.object({
-  name: z.string().min(20, "Name must be at least 20 characters").max(60, "Name must be at most 60 characters"),
+  name: z
+    .string()
+    .min(20, "Name must be at least 20 characters")
+    .max(60, "Name must be at most 60 characters"),
   email: z.string().email("Must follow standard email validation rules"),
-  password: z.string()
+  password: z
+    .string()
     .min(8, "Password must be at least 8 characters")
     .max(16, "Password must be at most 16 characters")
-    .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])/, "Password must include at least one uppercase letter and one special character"),
+    .regex(
+      /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])/,
+      "Password must include at least one uppercase letter and one special character"
+    ),
   address: z.string().max(400, "Address must be at most 400 characters"),
   role: z.string().default("user"),
 });
@@ -57,10 +80,14 @@ export const storeSchema = z.object({
 
 export const updatePasswordSchema = z.object({
   currentPassword: z.string().min(1, "Current password is required"),
-  newPassword: z.string()
+  newPassword: z
+    .string()
     .min(8, "Password must be at least 8 characters")
     .max(16, "Password must be at most 16 characters")
-    .regex(/^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])/, "Password must include at least one uppercase letter and one special character"),
+    .regex(
+      /^(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>])/,
+      "Password must include at least one uppercase letter and one special character"
+    ),
 });
 
 export const ratingSchema = z.object({

@@ -2,10 +2,10 @@ import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { LogOut, Star, Store, Settings, Search, ArrowUpDown } from "lucide-react";
@@ -29,7 +29,12 @@ export default function UserDashboard() {
   const { data: userRatings = [] } = useQuery({ queryKey: ["/api/ratings/user"] });
 
   // Filter and sort stores
-  const filteredAndSortedStores = stores
+  const filteredAndSortedStores = (stores as Array<{
+    id: string;
+    name: string;
+    address: string;
+    averageRating?: number;
+  }>)
     .filter((store: any) =>
       store.name.toLowerCase().includes(search.toLowerCase()) ||
       store.address.toLowerCase().includes(search.toLowerCase())
@@ -44,7 +49,7 @@ export default function UserDashboard() {
 
   // Helper functions
   const getUserRating = (storeId: string) => {
-    const userRating = userRatings.find((r: any) => r.storeId === storeId);
+    const userRating = (userRatings as Array<{ storeId: string; rating: number }>).find(r => r.storeId === storeId);
     return userRating?.rating || 0;
   };
 

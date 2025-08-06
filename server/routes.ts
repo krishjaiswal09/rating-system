@@ -62,8 +62,8 @@ export function setupRoutes(app: Express) {
     res.json({ id: user.id, email: user.email, role: user.role, name: user.name });
   });
 
-  // Middleware for auth
-  const requireAuth = async (req: any, res: any, next: any) => {
+  // Custom middleware to attach user to request
+  const attachUser = async (req: any, res: any, next: any) => {
     if (!req.session.userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
@@ -74,7 +74,11 @@ export function setupRoutes(app: Express) {
     req.user = user;
     next();
   };
-
+  
+  // Use attachUser middleware for all protected routes
+  const requireAuth = attachUser;
+  
+  // Simple middleware to check for admin role
   const requireAdmin = (req: any, res: any, next: any) => {
     if (req.user.role !== "admin") {
       return res.status(403).json({ message: "Admin access required" });

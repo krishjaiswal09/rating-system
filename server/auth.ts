@@ -25,11 +25,11 @@ export function getSession() {
 }
 
 export async function hashPassword(password: string): Promise<string> {
-  return await bcrypt.hash(password, 12);
+  return bcrypt.hash(password, 12);
 }
 
 export async function comparePassword(password: string, hash: string): Promise<boolean> {
-  return await bcrypt.compare(password, hash);
+  return bcrypt.compare(password, hash);
 }
 
 export const requireAuth: RequestHandler = (req, res, next) => {
